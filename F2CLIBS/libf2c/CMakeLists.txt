@@ -44,11 +44,22 @@ if(UNIX)
 endif()
 set_target_properties(arithchk PROPERTIES COMPILE_DEFINITIONS 
   "NO_FPINIT;NO_LONG_LONG")
-ADD_CUSTOM_COMMAND(
-   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/arith.h
-   COMMAND arithchk > ${CMAKE_CURRENT_BINARY_DIR}/arith.h
-   DEPENDS arithchk
-   )
+if(CMAKE_CROSSCOMPILING)
+  # When cross compiling, we require arithchk to be available from host
+  if(NOT DEFINED ENV{ARITHCHK})
+    message(FATAL_ERROR "Please set ARITHCHK to the path of the arithchk binary executable on host")
+  endif()
+  ADD_CUSTOM_COMMAND(
+     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/arith.h
+     COMMAND $ENV{ARITHCHK} > ${CMAKE_CURRENT_BINARY_DIR}/arith.h
+     )
+else()
+  ADD_CUSTOM_COMMAND(
+     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/arith.h
+     COMMAND arithchk > ${CMAKE_CURRENT_BINARY_DIR}/arith.h
+     DEPENDS arithchk
+     )
+endif()
 
 
 set(OFILES  ${MISC} ${POW} ${CX} ${DCX} ${REAL} ${DBL} ${INT} 
