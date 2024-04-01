@@ -66,4 +66,7 @@ if(BUILD_COMPLEX16)
   set(ALLOBJ $(ZMATGEN) $(DZATGEN))
 endif()
 add_library(tmglib ${ALLOBJ} )
+if(CLAPACK_INSTALL_TESTS)
+  install(TARGETS tmglib DESTINATION "lib/")
+endif()
 

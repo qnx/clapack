@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+
+SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+exec ${SCRIPTPATH}/@TEST_TARGET@ < ${SCRIPTPATH}/@TEST_INPUT_NAME@

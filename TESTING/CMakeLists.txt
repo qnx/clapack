@@ -1,8 +1,15 @@
+option(CLAPACK_INSTALL_TESTS "Install tests to be run on target" OFF)
 if(MSVC_VERSION)
 #  string(REPLACE "/STACK:10000000" "/STACK:900000000000000000"
 #    CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
   string(REGEX REPLACE "(.*)/STACK:(.*) (.*)" "\\1/STACK:900000000000000000 \\3"
     CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+endif()
+if(QNX)
+  # Set stack size to 16 MiB on QNX because the default is nowhere enough to run tests
+  # Some test binaries also contain duplicate symbols; these are fine and we can ignore
+  # these errors produced by qcc.
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -N 16777216 -Wl,-z muldefs")
 endif()
 add_subdirectory(MATGEN)
 add_subdirectory(LIN)
@@ -13,12 +20,26 @@ macro(add_lapack_test output input target)
   string(REPLACE "." "_" input_name ${input})
   set(testName "${target}_${input_name}")
   if(EXISTS "${TEST_INPUT}")
-    add_test(${testName} "${CMAKE_COMMAND}"
-      -DTEST=$<TARGET_FILE:${name}>
-      -DINPUT=${TEST_INPUT}
-      -DOUTPUT=${TEST_OUTPUT}
-      -DINTDIR=${CMAKE_CFG_INTDIR}
-      -P "${CLAPACK_SOURCE_DIR}/TESTING/runtest.cmake")
+    if(CLAPACK_INSTALL_TESTS)
+      # Install test and its input on target
+      install(TARGETS ${target} DESTINATION "bin/clapack_tests")
+      install(FILES ${TEST_INPUT} DESTINATION "bin/clapack_tests")
+      set(TEST_TARGET ${target})
+      set(TEST_INPUT_NAME ${input})
+      # Generate a test script to run on target
+      configure_file(run_test.sh.in "${CMAKE_CURRENT_BINARY_DIR}/${testName}.sh" @ONLY)
+      install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${testName}.sh"
+              DESTINATION "bin/clapack_tests"
+              PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                          GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+    else()
+      add_test(${testName} "${CMAKE_COMMAND}"
+        -DTEST=$<TARGET_FILE:${name}>
+        -DINPUT=${TEST_INPUT}
+        -DOUTPUT=${TEST_OUTPUT}
+        -DINTDIR=${CMAKE_CFG_INTDIR}
+        -P "${CLAPACK_SOURCE_DIR}/TESTING/runtest.cmake")
+    endif()
   endif()
 endmacro(add_lapack_test)
 
