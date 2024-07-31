@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shiplist>
+    <id>com.qnx.${baselineId}.osr.clapack</id>
+    <version>3.2.1</version>
+    <name>CLAPACK</name>
+    <category>OSR</category>
+    <property key="product">Prebuilt Open Source Packages</property>
+    <property key="f.support" value="Custom"/>
+    <property key="f.engage" value="B"/>
+    <property key="f.swtype" value="III"/>
+    <property key="useInfo" value="false"/>
+    <property key="runtime" value="true"/>
+    <packageType>component</packageType>
+    <description>C conversion of Fortran 77 Linear Algebra PACKage (LAPACK) library</description>
+    <asset dest="${targetfolder}/[ARCH:x86_64,aarch64le]/usr/local/include/"/>
+    <asset dest="${targetfolder}/[ARCH:x86_64,aarch64le]/usr/local/lib/"/>
+    <asset dest="${targetfolder}/[ARCH:x86_64,aarch64le]/usr/local/bin/clapack_tests/"/>
+</shiplist>
